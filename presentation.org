@@ -20,8 +20,24 @@
 * Polymorphism
 
 #+BEGIN_QUOTE
-In computer science, a type class is a type system construct that supports ad
-hoc polymorphism. This is achieved by adding constraints to type variables in
-parametrically polymorphic types. 
-                                                                 -- [[https://en.wikipedia.org/wiki/Type_class][Wikipedia]]
+In computer science, a type class is a type system construct that supports ad hoc polymorphism. This
+is achieved by adding constraints to type variables in parametrically polymorphic types. 
+                                                                                        -- [[https://en.wikipedia.org/wiki/Type_class][Wikipedia]]
 #+END_QUOTE
+
+* Parametric polymorphism
+
+When a function or data type can handle values uniformly without depending on their type.
+
+#+BEGIN_SRC scala
+def length[A](xs: List[A]) = xs match {
+  case Nil => 0
+  case _ :: t => 1 + length(t)
+}
+#+END_SRC
+
+#+BEGIN_SRC scala
+sealed trait List[+A]
+case object Nil extends List[Nothing]
+case class Cons[+A](h: A, t: List[A]) extends List[A]
+#+END_SRC
