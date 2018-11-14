@@ -37,7 +37,27 @@ def length[A](xs: List[A]) = xs match {
 #+END_SRC
 
 #+BEGIN_SRC scala
+val l1: List[Int]    = List(1, 2, 3)
+val l2: List[String] = List("a", "b", "c")
+val l3: List[Double] = List(1.0, 2.0, 3.0)
+
+length(l1) //// => 3
+length(l2) //// => 3
+length(l3) //// => 3
+#+END_SRC
+
+* Parametric polymorphism
+
+When a function or data type can handle values uniformly without depending on their type.
+
+#+BEGIN_SRC scala
 sealed trait List[+A]
 case object Nil extends List[Nothing]
-case class Cons[+A](h: A, t: List[A]) extends List[A]
+case class Cons[A](head: A, tail: List[A]) extends List[A]
+#+END_SRC
+
+#+BEGIN_SRC scala
+val l1: List[Int]    = Cons(1, Cons(2, Cons(3, Nil)))
+val l2: List[String] = Cons("a", Cons("b", Cons("c", Nil)))
+val l3: List[Double] = Cons(1.0, Cons(2.0, Cons(3.0, Nil)))
 #+END_SRC
