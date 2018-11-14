@@ -1,0 +1,27 @@
+#+TITLE: Type classes in Scala
+#+SUBTITLE: Velocidi Tech Talks
+
+#+AUTHOR: Joao Azevedo
+#+EMAIL: joao.c.azevedo@gmail.com
+#+DATE: November 16, 2018
+
+* Outline
+
+1. Polymorphism
+2. Implicits
+3. Running example
+4. Derivation of type classes
+5. Shapeless
+6. Generic derivation of type classes
+7. Configuring derivation
+8. Automatic and semiautomatic derivation
+9. Other resources
+
+* Polymorphism
+
+#+BEGIN_QUOTE
+In computer science, a type class is a type system construct that supports ad
+hoc polymorphism. This is achieved by adding constraints to type variables in
+parametrically polymorphic types. 
+                                                                 -- [[https://en.wikipedia.org/wiki/Type_class][Wikipedia]]
+#+END_QUOTE
