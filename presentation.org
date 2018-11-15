@@ -14,8 +14,7 @@
 5. Shapeless
 6. Generic derivation of type classes
 7. Configuring derivation
-8. Automatic and semiautomatic derivation
-9. Other resources
+8. Other resources
 
 * Polymorphism
 
