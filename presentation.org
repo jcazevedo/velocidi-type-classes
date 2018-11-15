@@ -175,3 +175,20 @@ implicit class TalkerOps[A: Talker](x: A) {
 (new Cat).talk //// => "Meow!"
 #+END_SRC
 
+* Running example
+
+We're going to use Typesafe Config as a running example throughout this presentation, attempting to
+create a type class based solution to read and write ConfigValues. The Typesafe Config classes can
+be summarized in:
+
+#+BEGIN_SRC java
+public interface ConfigValue
+abstract class ConfigNumber extends ConfigValue
+final class ConfigDouble extends ConfigNumber
+final class ConfigInt extends ConfigNumber
+final class ConfigLong extends ConfigNumber
+final class ConfigBoolean extends ConfigValue
+abstract class ConfigString extends ConfigValue
+public interface ConfigObject extends ConfigValue, Map<String, ConfigValue>
+public interface ConfigList extends ConfigValue, List<ConfigValue>
+#+END_SRC
