@@ -61,3 +61,29 @@ val l1: List[Int]    = Cons(1, Cons(2, Cons(3, Nil)))
 val l2: List[String] = Cons("a", Cons("b", Cons("c", Nil)))
 val l3: List[Double] = Cons(1.0, Cons(2.0, Cons(3.0, Nil)))
 #+END_SRC
+
+* Subtype polymorphism
+
+Subtyping allows a function to take an object of a certain type, but also work correctly for
+subtypes.
+
+#+BEGIN_SRC scala
+trait Animal {
+  def talk: String
+}
+
+class Cat extends Animal {
+  def talk = "Meow!"
+}
+
+class Dog extends Animal {
+  def talk = "Woof!"
+}
+#+END_SRC
+
+#+BEGIN_SRC scala
+def hear(a: Animal): String = a.talk
+
+hear(new Cat) //// => "Meow!"
+hear(new Dog) //// => "Woof!"
+#+END_SRC
