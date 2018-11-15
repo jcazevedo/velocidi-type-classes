@@ -113,7 +113,7 @@ hear(new Dog) //// => "Woof!"
 
 Type classes were first introduced in Haskell and provide an additional way to support ad hoc
 polymorphism. In Haskell, if a type is part of a type class, then it supports and implements the
-behavior the typeclass describes. 
+behavior the type class describes.
 
 There is no special syntax in Scala to express a type class, but we can achieve the same
 functionality with constructs of the language.
