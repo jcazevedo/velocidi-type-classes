@@ -8,7 +8,7 @@
 * Outline
 
 1. Polymorphism
-2. Implicits
+2. Type classes
 3. Running example
 4. Derivation of type classes
 5. Shapeless
