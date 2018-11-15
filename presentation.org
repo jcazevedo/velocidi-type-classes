@@ -202,9 +202,9 @@ trait ConfigReader[A] {
 
 object ConfigReader {
   object Ops {
-    implicit class ConfigReaderOps[A: ConfigReader](x: A) {
-      def fromConfig(configValue: ConfigValue): A =
-        implicitly[ConfigReader[A]].read(configValue)
+    implicit class ConfigReaderOps(x: ConfigValue) {
+      def as[A: ConfigReader]: A =
+        implicitly[ConfigReader[A]].read(x)
     }
   }
 }
@@ -226,3 +226,6 @@ object ConfigWriter {
   }
 }
 #+END_SRC
+
+* Basic readers
+
