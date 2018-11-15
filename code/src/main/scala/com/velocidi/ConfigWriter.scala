@@ -7,8 +7,10 @@ trait ConfigWriter[A] {
 }
 
 object ConfigWriter {
-  implicit class ConfigWriterOps[A: ConfigWriter](x: A) {
-    def toConfig: ConfigValue =
-      implicitly[ConfigWriter[A]].write(x)
+  object Ops {
+    implicit class ConfigWriterOps[A: ConfigWriter](x: A) {
+      def toConfig: ConfigValue =
+        implicitly[ConfigWriter[A]].write(x)
+    }
   }
 }

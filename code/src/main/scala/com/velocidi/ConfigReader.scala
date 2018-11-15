@@ -7,8 +7,10 @@ trait ConfigReader[A] {
 }
 
 object ConfigReader {
-  implicit class ConfigReaderOps[A: ConfigReader](x: A) {
-    def fromConfig(configValue: ConfigValue): A =
-      implicitly[ConfigReader[A]].read(configValue)
+  object Ops {
+    implicit class ConfigReaderOps[A: ConfigReader](x: A) {
+      def fromConfig(configValue: ConfigValue): A =
+        implicitly[ConfigReader[A]].read(configValue)
+    }
   }
 }
