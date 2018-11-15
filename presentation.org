@@ -2,7 +2,7 @@
 #+SUBTITLE: Velocidi Tech Talks
 
 #+AUTHOR: Joao Azevedo
-#+EMAIL: joao.c.azevedo@gmail.com
+
 #+DATE: November 16, 2018
 
 * Outline
@@ -27,7 +27,7 @@ is achieved by adding constraints to type variables in parametrically polymorphi
 
 * Parametric polymorphism
 
-Parametric polymorphism allows a function or data type can handle values uniformly without depending
+Parametric polymorphism allows a function or data type to handle values uniformly without depending
 on their type.
 
 #+BEGIN_SRC scala
@@ -116,7 +116,7 @@ Type classes were first introduced in Haskell and provide an additional way to s
 polymorphism. In Haskell, if a type is part of a type class, then it supports and implements the
 behavior the typeclass describes. 
 
-There is no special syntax in Scala to express a typeclass, but we can achieve the same
+There is no special syntax in Scala to express a type class, but we can achieve the same
 functionality with constructs of the language.
 
 #+BEGIN_SRC scala
