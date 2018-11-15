@@ -13,6 +13,7 @@ object Main extends App {
        |  c = 4.5
        |  d = "str"
        |  e = false
+       |  f = [1, 2, 3]
        |}""".stripMargin)
 
   assert(conf.getValue("a").as[Int] == 1)
@@ -20,6 +21,8 @@ object Main extends App {
   assert(conf.getValue("c").as[Double] == 4.5)
   assert(conf.getValue("d").as[String] == "str")
   assert(conf.getValue("e").as[Boolean] == false)
+  assert(conf.getValue("f").as[List[Int]] == List(1, 2, 3))
+  assert(conf.getValue("f").as[Set[Int]] == Set(1, 2, 3))
 
   assert(1.toConfig == ConfigValueFactory.fromAnyRef(1))
   assert(1099511627776l.toConfig == ConfigValueFactory.fromAnyRef(1099511627776l))

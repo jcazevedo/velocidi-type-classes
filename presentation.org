@@ -315,3 +315,45 @@ import ConfigWriter.Ops._
 "str".toConfig //// => Quoted("str")
 false.toConfig //// => ConfigBoolean(false)
 #+END_SRC
+
+* Derivation of type classes
+
+Building upon available readers and writers, we can start deriving type classes for collection
+types:
+
+#+BEGIN_SRC scala
+import scala.collection.JavaConverters._
+import scala.collection.generic.CanBuildFrom
+import scala.language.higherKinds
+
+trait CollectionReaders {
+  implicit def traversableReader[A, F[A] <: TraversableOnce[A]](
+    implicit
+    reader: ConfigReader[A],
+    cbf: CanBuildFrom[F[A], A, F[A]]): ConfigReader[F[A]] = new ConfigReader[F[A]] {
+    def read(configValue: ConfigValue): F[A] =
+      configValue.asInstanceOf[ConfigList].asScala.foldLeft(cbf()) {
+        case (acc, x) => acc += reader.read(x)
+      }.result()
+  }
+}
+
+object ConfigReader extends CollectionReaders
+#+END_SRC
+
+* Derivation of type classes
+
+#+BEGIN_SRC scala
+val conf = ConfigFactory.parseString(
+  """|{
+     |  a = 1
+     |  b = 1099511627776
+     |  c = 4.5
+     |  d = "str"
+     |  e = false
+     |  f = [1, 2, 3]
+     |}""".stripMargin)
+
+conf.getValue("f").as[List[Int]] //// => List(1, 2, 3)
+conf.getValue("f").as[Set[Int]] //// => Set(1, 2, 3)
+#+END_SRC
