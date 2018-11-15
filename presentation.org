@@ -161,3 +161,17 @@ def hear[A](x: A)(implicit talker: Talker[A]) = talker.talk(x)
 hear(new Dog) //// => "Woof!"
 hear(new Cat) //// => "Meow!"
 #+END_SRC
+
+* Type classes
+
+We can improve this by adding a way to call talk on instances that have a Talker type class:
+
+#+BEGIN_SRC scala
+implicit class TalkerOps[A: Talker](x: A) {
+  def talk = implicitly[Talker[A]].talk(x)
+}
+
+(new Dog).talk //// => "Woof!"
+(new Cat).talk //// => "Meow!"
+#+END_SRC
+
