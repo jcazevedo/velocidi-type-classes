@@ -35,9 +35,7 @@ def length[A](xs: List[A]) = xs match {
   case Nil => 0
   case _ :: t => 1 + length(t)
 }
-#+END_SRC
 
-#+BEGIN_SRC scala
 val l1: List[Int]    = List(1, 2, 3)
 val l2: List[String] = List("a", "b", "c")
 val l3: List[Double] = List(1.0, 2.0, 3.0)
@@ -56,9 +54,7 @@ on their type.
 sealed trait List[+A]
 case object Nil extends List[Nothing]
 case class Cons[A](head: A, tail: List[A]) extends List[A]
-#+END_SRC
 
-#+BEGIN_SRC scala
 val l1: List[Int]    = Cons(1, Cons(2, Cons(3, Nil)))
 val l2: List[String] = Cons("a", Cons("b", Cons("c", Nil)))
 val l3: List[Double] = Cons(1.0, Cons(2.0, Cons(3.0, Nil)))
@@ -81,9 +77,7 @@ class Cat extends Animal {
 class Dog extends Animal {
   def talk = "Woof!"
 }
-#+END_SRC
 
-#+BEGIN_SRC scala
 def hear(a: Animal): String = a.talk
 
 hear(new Cat) //// => "Meow!"
@@ -98,9 +92,7 @@ arguments of different types.
 #+BEGIN_SRC scala
 def add(x: Int, y: Int) = x + y
 def add(x: String, y: String) = x + y
-#+END_SRC
 
-#+BEGIN_SRC scala
 add(1, 2) //// => 3
 add("a", "b") //// => "ab"
 #+END_SRC
@@ -113,9 +105,60 @@ arguments of different types.
 #+BEGIN_SRC scala
 def hear(c: Cat) = "Meow!"
 def hear(c: Dog) = "Woof!"
-#+END_SRC
 
-#+BEGIN_SRC scala
 hear(new Cat) //// => "Meow!"
 hear(new Dog) //// => "Woof!"
+#+END_SRC
+
+* Type classes
+
+Type classes were first introduced in Haskell and provide an additional way to support ad hoc
+polymorphism. In Haskell, if a type is part of a type class, then it supports and implements the
+behavior the typeclass describes. 
+
+There is no special syntax in Scala to express a typeclass, but we can achieve the same
+functionality with constructs of the language.
+
+#+BEGIN_SRC scala
+trait Talker[A] {
+  def talk(x: A): String
+}
+
+object Talker {
+  val dogTalker: Talker[Dog] = new Talker[Dog] {
+    def talk(x: Dog) = "Woof!"
+  }
+
+  val catTalker: Talker[Cat] = new Talker[Cat] {
+    def talk(x: Cat) = "Meow!"
+  }
+}
+
+Talker.dogTalker.talk(new Dog) //// => "Woof!"
+Talker.catTalker.talk(new Cat) //// => "Meow!"
+#+END_SRC
+
+* Type classes
+
+We can avoid calling the Talker's explicitly by making the Talker implicit in the hear method:
+
+#+BEGIN_SRC scala
+trait Talker[A] {
+  def talk(x: A): String
+}
+
+object Talker {
+  implicit val dogTalker: Talker[Dog] = new Talker[Dog] {
+    def talk(x: Dog) = "Woof!"
+  }
+
+  implicit val catTalker: Talker[Cat] = new Talker[Cat] {
+    def talk(x: Cat) = "Meow!"
+  }
+}
+
+def hear[A](x: A)(implicit talker: Talker[A]) = talker.talk(x)
+
+hear(new Dog) //// => "Woof!"
+hear(new Cat) //// => "Meow!"
 #+END_SRC
