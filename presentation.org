@@ -192,3 +192,37 @@ abstract class ConfigString extends ConfigValue
 public interface ConfigObject extends ConfigValue, Map<String, ConfigValue>
 public interface ConfigList extends ConfigValue, List<ConfigValue>
 #+END_SRC
+
+* Running example
+
+#+BEGIN_SRC scala
+trait ConfigReader[A] {
+  def read(configValue: ConfigValue): A
+}
+
+object ConfigReader {
+  object Ops {
+    implicit class ConfigReaderOps[A: ConfigReader](x: A) {
+      def fromConfig(configValue: ConfigValue): A =
+        implicitly[ConfigReader[A]].read(configValue)
+    }
+  }
+}
+#+END_SRC
+
+* Running example
+
+#+BEGIN_SRC scala
+trait ConfigWriter[A] {
+  def write(value: A): ConfigValue
+}
+
+object ConfigWriter {
+  object Ops {
+    implicit class ConfigWriterOps[A: ConfigWriter](x: A) {
+      def toConfig: ConfigValue =
+        implicitly[ConfigWriter[A]].write(x)
+    }
+  }
+}
+#+END_SRC
