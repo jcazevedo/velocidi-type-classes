@@ -87,3 +87,33 @@ def hear(a: Animal): String = a.talk
 hear(new Cat) //// => "Meow!"
 hear(new Dog) //// => "Woof!"
 #+END_SRC
+
+* Ad hoc polymorphism
+
+A kind of polymorphism in which polymorphic functions can be applied to arguments of different
+types.
+
+#+BEGIN_SRC scala
+def add(x: Int, y: Int) = x + y
+def add(x: String, y: String) = x + y
+#+END_SRC
+
+#+BEGIN_SRC scala
+add(1, 2) //// => 3
+add("a", "b") //// => "ab"
+#+END_SRC
+
+* Ad hoc polymorphism
+
+A kind of polymorphism in which polymorphic functions can be applied to arguments of different
+types.
+
+#+BEGIN_SRC scala
+def hear(c: Cat) = "Meow!"
+def hear(c: Dog) = "Woof!"
+#+END_SRC
+
+#+BEGIN_SRC scala
+hear(new Cat) //// => "Meow!"
+hear(new Dog) //// => "Woof!"
+#+END_SRC
