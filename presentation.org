@@ -27,7 +27,8 @@ is achieved by adding constraints to type variables in parametrically polymorphi
 
 * Parametric polymorphism
 
-When a function or data type can handle values uniformly without depending on their type.
+Parametric polymorphism allows a function or data type can handle values uniformly without depending
+on their type.
 
 #+BEGIN_SRC scala
 def length[A](xs: List[A]) = xs match {
@@ -48,7 +49,8 @@ length(l3) //// => 3
 
 * Parametric polymorphism
 
-When a function or data type can handle values uniformly without depending on their type.
+Parametric polymorphism allows a function or data type can handle values uniformly without depending
+on their type.
 
 #+BEGIN_SRC scala
 sealed trait List[+A]
@@ -90,8 +92,8 @@ hear(new Dog) //// => "Woof!"
 
 * Ad hoc polymorphism
 
-A kind of polymorphism in which polymorphic functions can be applied to arguments of different
-types.
+Ad hoc polymorphism is a kind of polymorphism in which polymorphic functions can be applied to
+arguments of different types.
 
 #+BEGIN_SRC scala
 def add(x: Int, y: Int) = x + y
@@ -105,8 +107,8 @@ add("a", "b") //// => "ab"
 
 * Ad hoc polymorphism
 
-A kind of polymorphism in which polymorphic functions can be applied to arguments of different
-types.
+Ad hoc polymorphism is a kind of polymorphism in which polymorphic functions can be applied to
+arguments of different types.
 
 #+BEGIN_SRC scala
 def hear(c: Cat) = "Meow!"
