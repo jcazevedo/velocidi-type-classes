@@ -275,3 +275,43 @@ conf.getValue("c").as[Double] //// => 4.5
 conf.getValue("d").as[String] //// => "str"
 conf.getValue("e").as[Boolean] //// => false
 #+END_SRC
+
+* Basic writers
+
+#+BEGIN_SRC scala
+trait BasicWriters {
+  implicit val intWriter: ConfigWriter[Int] = new ConfigWriter[Int] {
+    def write(value: Int): ConfigValue = ConfigValueFactory.fromAnyRef(value)
+  }
+
+  implicit val longWriter: ConfigWriter[Long] = new ConfigWriter[Long] {
+    def write(value: Long): ConfigValue = ConfigValueFactory.fromAnyRef(value)
+  }
+
+  implicit val doubleWriter: ConfigWriter[Double] = new ConfigWriter[Double] {
+    def write(value: Double): ConfigValue = ConfigValueFactory.fromAnyRef(value)
+  }
+
+  implicit val stringWriter: ConfigWriter[String] = new ConfigWriter[String] {
+    def write(value: String): ConfigValue = ConfigValueFactory.fromAnyRef(value)
+  }
+
+  implicit val booleanWriter: ConfigWriter[Boolean] = new ConfigWriter[Boolean] {
+    def write(value: Boolean): ConfigValue = ConfigValueFactory.fromAnyRef(value)
+  }
+}
+
+object ConfigWriter extends BasicWriters
+#+END_SRC
+
+* Basic writers
+
+#+BEGIN_SRC scala
+import ConfigWriter.Ops._
+
+1.toConfig //// => ConfigInt(1)
+1099511627776l.toConfig //// => ConfigLong(1099511627776)
+4.5.toConfig //// => ConfigDouble(4.5)
+"str".toConfig //// => Quoted("str")
+false.toConfig //// => ConfigBoolean(false)
+#+END_SRC
