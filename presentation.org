@@ -435,8 +435,8 @@ Map("a" -> 1, "b" -> 2, "c" -> 3).toConfig
 //// => SimpleConfigObject({"a":1,"b":2,"c":3})
 
 Map(
-  "a" -> List(Map("k1" -> "v1")), 
-  "b" -> List(), 
+  "a" -> List(Map("k1" -> "v1")),
+  "b" -> List(),
   "c" -> List(Map("k2" -> "v2", "k3" -> "v3")).toConfig
 //// => SimpleConfigObject({"a":[{"k1":"v1"}],"b":[],"c":[{"k2":"v2","k3":"v3"}]})
 #+END_SRC
@@ -458,7 +458,7 @@ val rabbitmqConf = ConfigFactory.parseString(
      |}""".stripMargin)
 
 rabbitmqConf.getValue("rabbitmq").as[RabbitMQ]
-//// => could not find implicit value for evidence parameter of type 
+//// => could not find implicit value for evidence parameter of type
 ////    com.velocidi.ConfigReader[com.velocidi.Main.RabbitMQ]
 ////    :(
 #+END_SRC
@@ -493,18 +493,57 @@ teapot. Water can drip and it can crash. Become like water my friend.
                                                                                        -- Bruce Lee
 #+END_QUOTE
 
+#+BEGIN_SRC scala
+import shapeless._
+import shapeless.labelled._
+import shapeless.syntax.singleton._
+#+END_SRC
+
 * Singleton types
 
 Shapeless adds support for singleton-typed literals via implicit macros.
 
 #+BEGIN_SRC scala
-import shapeless.syntax.singleton._
-
 23.narrow     //// => Int(42)       <: Int
 "str".narrow  //// => String("str") <: String
 'foo.narrow   //// => Symbol('foo)  <: Symbol
+#+END_SRC
 
+* Tagged values
+
+Shapeless allows us to label values at the type level.
+
+#+BEGIN_SRC scala
 'a ->> 23     //// => Int with KeyTag[Symbol with Tagged[String("a")], Int]
 'b ->> "str"  //// => String with KeyTag[Symbol with Tagged[String("b")], String]
 'c ->> 'foo   //// => Symbol with KeyTag[Symbol with Tagged[String("c")], Symbol]
+#+END_SRC
+
+* Tagged values from the type level to the value level
+
+The Witness type class allows us to pull labels from the type level to the value level.
+
+#+BEGIN_SRC scala
+def f[K, V](v: FieldType[K, V])(
+  implicit
+  witness: Witness.Aux[K]): (K, V) = witness.value -> v
+
+F('a ->> "bar") //// => ('a, "bar")
+#+END_SRC
+
+* (The Aux pattern)
+
+#+BEGIN_SRC scala
+trait Witness {
+  type T
+}
+
+object Witness {
+  type Aux[T0] = Witness { type T = T0 }
+}
+
+//// Because the following doesn't compile
+def f[V](v: FieldType[witness.T, V])(
+  implicit
+  witness: Witness): (witness.T, V) = witness.value -> v
 #+END_SRC
