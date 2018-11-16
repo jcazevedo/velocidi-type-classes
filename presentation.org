@@ -19,15 +19,16 @@
 * Polymorphism
 
 #+BEGIN_QUOTE
-In computer science, a type class is a type system construct that supports ad hoc polymorphism. This
-is achieved by adding constraints to type variables in parametrically polymorphic types.
-                                                                                        -- [[https://en.wikipedia.org/wiki/Type_class][Wikipedia]]
+In computer science, a type class is a type system construct that supports ad
+hoc polymorphism. This is achieved by adding constraints to type variables in
+parametrically polymorphic types.
+                                                                 -- [[https://en.wikipedia.org/wiki/Type_class][Wikipedia]]
 #+END_QUOTE
 
 * Parametric polymorphism
 
-Parametric polymorphism allows a function or data type to handle values uniformly without depending
-on their type.
+Parametric polymorphism allows a function or data type to handle values
+uniformly without depending on their type.
 
 #+BEGIN_SRC scala
 def drop1[A](xs: List[A]) = xs.tail
@@ -43,8 +44,8 @@ drop1(l3) //// => List(2.0, 3.0)
 
 * Parametric polymorphism
 
-Parametric polymorphism allows a function or data type to handle values uniformly without depending
-on their type.
+Parametric polymorphism allows a function or data type to handle values
+uniformly without depending on their type.
 
 #+BEGIN_SRC scala
 sealed trait List[+A]
@@ -58,8 +59,8 @@ val l3: List[Double] = Cons(1.0, Cons(2.0, Cons(3.0, Nil)))
 
 * Subtype polymorphism
 
-Subtyping allows a function to take an object of a certain type, but also work correctly for
-subtypes.
+Subtyping allows a function to take an object of a certain type, but also work
+correctly for subtypes.
 
 #+BEGIN_SRC scala
 trait Animal {
@@ -82,8 +83,8 @@ hear(new Dog) //// => "Woof!"
 
 * Ad hoc polymorphism
 
-Ad hoc polymorphism is a kind of polymorphism in which polymorphic functions can be applied to
-arguments of different types.
+Ad hoc polymorphism is a kind of polymorphism in which polymorphic functions
+can be applied to arguments of different types.
 
 #+BEGIN_SRC scala
 def add(x: Int, y: Int) = x + y
@@ -108,12 +109,13 @@ hear(new Dog) //// => "Woof!"
 
 * Type classes
 
-Type classes were first introduced in Haskell and provide an additional way to support ad hoc
-polymorphism. In Haskell, if a type is part of a type class, then it supports and implements the
-behavior the type class describes.
+Type classes were first introduced in Haskell and provide an
+additional way to support ad hoc polymorphism. In Haskell, if a type
+is part of a type class, then it supports and implements the behavior
+the type class describes.
 
-There is no special syntax in Scala to express a type class, but we can achieve the same
-functionality with constructs of the language.
+There is no special syntax in Scala to express a type class, but we
+can achieve the same functionality with constructs of the language.
 
 #+BEGIN_SRC scala
 trait Talker[A] {
@@ -161,11 +163,12 @@ hear(new Cat) //// => "Meow!"
 
 * Type classes
 
-We can improve this by adding a way to call talk on instances that have a Talker type class:
+We can improve this by adding a way to call talk on instances that
+have a Talker type class:
 
 #+BEGIN_SRC scala
-implicit class TalkerOps[A: Talker](x: A) {
-  def talk = implicitly[Talker[A]].talk(x)
+implicit class TalkerOps[A](x: A)(implicit talker: Talker[A]) {
+  def talk = talker.talk(x)
 }
 
 (new Dog).talk //// => "Woof!"
@@ -174,9 +177,10 @@ implicit class TalkerOps[A: Talker](x: A) {
 
 * Running example
 
-We're going to use Typesafe Config as a running example throughout this presentation, attempting to
-create a type class based solution to read and write ConfigValues. The Typesafe Config classes can
-be summarized in:
+We're going to use Typesafe Config as a running example throughout
+this presentation, attempting to create a type class based solution to
+read and write ConfigValues. The Typesafe Config classes can be
+summarized in:
 
 #+BEGIN_SRC java
 public interface ConfigValue
@@ -526,7 +530,7 @@ def f[K, V](v: FieldType[K, V])(
   implicit
   witness: Witness.Aux[K]): (K, V) = witness.value -> v
 
-F('a ->> "bar") //// => ('a, "bar")
+f('a ->> "bar") //// => ('a, "bar")
 #+END_SRC
 
 * (The Aux pattern)
@@ -559,7 +563,7 @@ Shapeless allows us to build heterogeneous lists.
 We can have HLists of tagged types.
 
 #+BEGIN_SRC scala
-('a ->> 23) :: ('b ->> "str") :: ('c -> 'foo) :: HNil
+('a ->> 23) :: ('b ->> "str") :: ('c ->> 'foo) :: HNil
 //// : Int with KeyTag[Symbol with Tagged[String("a")],Int] ::
 ////   String with KeyTag[Symbol with Tagged[String("b")],String] ::
 ////   Symbol with KeyTag[Symbol with Tagged[String("c")],Symbol] ::
@@ -796,8 +800,8 @@ val generic = LabelledGeneric[KeyValueStore]
 sealed trait Coproduct
 sealed trait CNil extends Coproduct
 sealed trait :+:[+H, +T <: Coproduct] extends Coproduct
-final case class Inl[+H, +T <: Coproduct](head : H) extends :+:[H, T]
-final case class Inr[+H, +T <: Coproduct](tail : T) extends :+:[H, T]
+final case class Inl[+H, +T <: Coproduct](head : H) extends :++:[H, T]
+final case class Inr[+H, +T <: Coproduct](tail : T) extends :++:[H, T]
 #+END_SRC
 
 * Deriving config readers for coproducts
