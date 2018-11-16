@@ -885,3 +885,77 @@ val sqlStore: KeyValueStore = SqlBased("jdbc:h2:mem:local;DB_CLOSE_DELAY=-1", "k
 sqlStore.toConfig
 //// => SimpleConfigObject({"jdbcUrl":"jdbc:h2:mem:local;DB_CLOSE_DELAY=-1","tableName":"kv-store"})
 #+END_SRC
+
+* Recursion
+
+#+BEGIN_SRC scala
+sealed trait BinaryTree[+A]
+case object EmptyTree extends BinaryTree[Nothing]
+case class Node[A](left: BinaryTree[A], right: BinaryTree[A]) extends BinaryTree[A]
+case class Leaf[A](value: A) extends BinaryTree[A]
+
+val bt = Node(
+  Node(
+    Leaf(1),
+    EmptyTree),
+  Node(
+    Node(
+      Leaf(2),
+      Leaf(3)),
+    Node(
+      EmptyTree,
+      Leaf(4))))
+bt.toConfig
+//// => Diverging implicit expansion! :(
+#+END_SRC
+
+* Lazy
+
+The Lazy macro triggers itself an implicit search for the required implicits, but if that search
+triggers searches for types wrapped in Lazy, then these will only be done once and put in a lazy
+val, whose reference is returned as the corresponding value.
+
+#+BEGIN_SRC scala
+trait DerivedWriters {
+  implicit def hListWriter[K <: Symbol, H, T <: HList](
+    implicit
+    witness: Witness.Aux[K],
+    hWriter: Lazy[ConfigWriter[H]],
+    tWriter: Lazy[ConfigWriter[T]]): ConfigWriter[FieldType[K, H] :: T] =
+    new ConfigWriter[FieldType[K, H] :: T] {
+      def write(value: FieldType[K, H] :: T): ConfigValue = {
+        val obj = tWriter.value.write(value.tail).asInstanceOf[ConfigObject]
+        val key = witness.value.name
+        obj.withValue(key, hWriter.value.write(value.head))
+      }
+    }
+}
+#+END_SRC
+
+* Using Lazy
+
+#+BEGIN_SRC scala
+val bt = Node(
+  Node(
+    Leaf(1),
+    EmptyTree),
+  Node(
+    Node(
+      Leaf(2),
+      Leaf(3)),
+    Node(
+      EmptyTree,
+      Leaf(4))))
+
+bt.toConfig
+//// SimpleConfigObject({"left":
+////                      {"left":{"value":1},
+////                       "right":{}},
+////                     "right":
+////                      {"left":
+////                        {"left":{"value":2},
+////                         "right":{"value":3}},
+////                       "right":
+////                        {"left":{},
+////                         "right":{"value":4}}}})
+#+END_SRC

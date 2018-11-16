@@ -77,14 +77,14 @@ trait DerivedReaders {
   implicit def hListReader[K <: Symbol, H, T <: HList](
     implicit
     witness: Witness.Aux[K],
-    hReader: ConfigReader[H],
-    tReader: ConfigReader[T]): ConfigReader[FieldType[K, H] :: T] =
+    hReader: Lazy[ConfigReader[H]],
+    tReader: Lazy[ConfigReader[T]]): ConfigReader[FieldType[K, H] :: T] =
     new ConfigReader[FieldType[K, H] :: T] {
       def read(configValue: ConfigValue): FieldType[K, H] :: T = {
         val obj = configValue.asInstanceOf[ConfigObject]
         val key = witness.value.name
         val head = obj.get(key)
-        field[K](hReader.read(head)) :: tReader.read(obj.withoutKey(key))
+        field[K](hReader.value.read(head)) :: tReader.value.read(obj.withoutKey(key))
       }
     }
 
@@ -95,18 +95,18 @@ trait DerivedReaders {
   implicit def coproductReader[K <: Symbol, H, T <: Coproduct](
     implicit
     witness: Witness.Aux[K],
-    hReader: ConfigReader[H],
-    tReader: ConfigReader[T]): ConfigReader[FieldType[K, H] :+: T] =
+    hReader: Lazy[ConfigReader[H]],
+    tReader: Lazy[ConfigReader[T]]): ConfigReader[FieldType[K, H] :+: T] =
     new ConfigReader[FieldType[K, H] :+: T] {
       def read(configValue: ConfigValue): FieldType[K, H] :+: T =
-        Try(Inl(field[K](hReader.read(configValue)))).getOrElse(Inr(tReader.read(configValue)))
+        Try(Inl(field[K](hReader.value.read(configValue)))).getOrElse(Inr(tReader.value.read(configValue)))
     }
 
   implicit def productReader[A, Repr](
     implicit
     gen: LabelledGeneric.Aux[A, Repr],
-    reprReader: ConfigReader[Repr]): ConfigReader[A] = new ConfigReader[A] {
+    reprReader: Lazy[ConfigReader[Repr]]): ConfigReader[A] = new ConfigReader[A] {
     def read(configValue: ConfigValue): A =
-      gen.from(reprReader.read(configValue))
+      gen.from(reprReader.value.read(configValue))
   }
 }

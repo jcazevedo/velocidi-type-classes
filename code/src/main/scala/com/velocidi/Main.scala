@@ -79,4 +79,22 @@ object Main extends App {
   assert(keyValueStoreConf.getValue("sql-based").as[KeyValueStore] == sqlStore)
   assert((kvStore: KeyValueStore).toConfig == keyValueStoreConf.getValue("in-memory"))
   assert((sqlStore: KeyValueStore).toConfig == keyValueStoreConf.getValue("sql-based"))
+
+  sealed trait BinaryTree[+A]
+  case object EmptyTree extends BinaryTree[Nothing]
+  case class Node[A](left: BinaryTree[A], right: BinaryTree[A]) extends BinaryTree[A]
+  case class Leaf[A](value: A) extends BinaryTree[A]
+
+  val bt = Node(
+    Node(
+      Leaf(1),
+      EmptyTree),
+    Node(
+      Node(
+        Leaf(2),
+        Leaf(3)),
+      Node(
+        EmptyTree,
+        Leaf(4))))
+  bt.toConfig
 }

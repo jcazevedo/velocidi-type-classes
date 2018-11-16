@@ -66,13 +66,13 @@ trait DerivedWriters {
   implicit def hListWriter[K <: Symbol, H, T <: HList](
     implicit
     witness: Witness.Aux[K],
-    hWriter: ConfigWriter[H],
-    tWriter: ConfigWriter[T]): ConfigWriter[FieldType[K, H] :: T] =
+    hWriter: Lazy[ConfigWriter[H]],
+    tWriter: Lazy[ConfigWriter[T]]): ConfigWriter[FieldType[K, H] :: T] =
     new ConfigWriter[FieldType[K, H] :: T] {
       def write(value: FieldType[K, H] :: T): ConfigValue = {
-        val obj = tWriter.write(value.tail).asInstanceOf[ConfigObject]
+        val obj = tWriter.value.write(value.tail).asInstanceOf[ConfigObject]
         val key = witness.value.name
-        obj.withValue(key, hWriter.write(value.head))
+        obj.withValue(key, hWriter.value.write(value.head))
       }
     }
 
@@ -83,19 +83,19 @@ trait DerivedWriters {
   implicit def coproductWriter[K <: Symbol, H, T <: Coproduct](
     implicit
     witness: Witness.Aux[K],
-    hWriter: ConfigWriter[H],
-    tWriter: ConfigWriter[T]): ConfigWriter[FieldType[K, H] :+: T] =
+    hWriter: Lazy[ConfigWriter[H]],
+    tWriter: Lazy[ConfigWriter[T]]): ConfigWriter[FieldType[K, H] :+: T] =
     new ConfigWriter[FieldType[K, H] :+: T] {
       def write(value: FieldType[K, H] :+: T): ConfigValue = value match {
-        case Inl(head) => hWriter.write(head)
-        case Inr(tail) => tWriter.write(tail)
+        case Inl(head) => hWriter.value.write(head)
+        case Inr(tail) => tWriter.value.write(tail)
       }
     }
 
   implicit def productWriter[A, Repr](
     implicit
     gen: LabelledGeneric.Aux[A, Repr],
-    reprWriter: ConfigWriter[Repr]): ConfigWriter[A] = new ConfigWriter[A] {
-    def write(value: A): ConfigValue = reprWriter.write(gen.to(value))
+    reprWriter: Lazy[ConfigWriter[Repr]]): ConfigWriter[A] = new ConfigWriter[A] {
+    def write(value: A): ConfigValue = reprWriter.value.write(gen.to(value))
   }
 }
