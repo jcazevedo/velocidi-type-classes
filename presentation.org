@@ -878,11 +878,11 @@ sealed trait KeyValueStore
 case class InMemory(maxSize: Int) extends KeyValueStore
 case class SqlBased(jdbcUrl: String, tableName: String) extends KeyValueStore
 
-val kvStore = InMemory(2000)
+val kvStore: KeyValueStore = InMemory(2000)
 kvStore.toConfig
 //// => SimpleConfigObject({"maxSize":2000})
 
-val sqlStore = SqlBased("jdbc:h2:mem:local;DB_CLOSE_DELAY=-1", "kv-store")
+val sqlStore: KeyValueStore = SqlBased("jdbc:h2:mem:local;DB_CLOSE_DELAY=-1", "kv-store")
 sqlStore.toConfig
 //// => SimpleConfigObject({"jdbcUrl":"jdbc:h2:mem:local;DB_CLOSE_DELAY=-1","tableName":"kv-store"})
 #+END_SRC
