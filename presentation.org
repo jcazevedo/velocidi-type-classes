@@ -47,7 +47,7 @@ length(l3) //// => 3
 
 * Parametric polymorphism
 
-Parametric polymorphism allows a function or data type can handle values uniformly without depending
+Parametric polymorphism allows a function or data type to handle values uniformly without depending
 on their type.
 
 #+BEGIN_SRC scala
