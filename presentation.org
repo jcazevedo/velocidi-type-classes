@@ -30,18 +30,15 @@ Parametric polymorphism allows a function or data type to handle values uniforml
 on their type.
 
 #+BEGIN_SRC scala
-def length[A](xs: List[A]) = xs match {
-  case Nil => 0
-  case _ :: t => 1 + length(t)
-}
+def drop1[A](xs: List[A]) = xs.tail
 
 val l1: List[Int]    = List(1, 2, 3)
 val l2: List[String] = List("a", "b", "c")
 val l3: List[Double] = List(1.0, 2.0, 3.0)
 
-length(l1) //// => 3
-length(l2) //// => 3
-length(l3) //// => 3
+drop1(l1) //// => List(2, 3)
+drop1(l2) //// => List("b", "c")
+drop1(l3) //// => List(2.0, 3.0)
 #+END_SRC
 
 * Parametric polymorphism
