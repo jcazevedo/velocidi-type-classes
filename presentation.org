@@ -441,7 +441,8 @@ Map(
 * Derivation of type classes
 
 #+BEGIN_SRC scala
-case class RabbitMQ(host: String, port: Int, username: String, password: String, exchangeName: String)
+case class RabbitMQ(
+  host: String, port: Int, username: String, password: String, defaultExchangeName: String)
 
 val rabbitmqConf = ConfigFactory.parseString(
   """|{
@@ -450,7 +451,7 @@ val rabbitmqConf = ConfigFactory.parseString(
      |    port = 5672
      |    username = "guest"
      |    password = "guest"
-     |    exchangeName = "sf.data"
+     |    defaultExchangeName = "sf.data"
      |  }
      |}""".stripMargin)
 
@@ -501,7 +502,7 @@ import shapeless.syntax.singleton._
 Shapeless adds support for singleton-typed literals via implicit macros.
 
 #+BEGIN_SRC scala
-23.narrow     //// : Int(42)       <: Int
+23.narrow     //// : Int(23)       <: Int
 "str".narrow  //// : String("str") <: String
 'foo.narrow   //// : Symbol('foo)  <: Symbol
 #+END_SRC
