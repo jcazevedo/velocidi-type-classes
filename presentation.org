@@ -481,3 +481,14 @@ implicit val rabbitmqConfigReader: ConfigReader[RabbitMQ] = new ConfigReader[Rab
 rabbitmqConf.getValue("rabbitmq").as[RabbitMQ]
 //// => RabbitMQ(localhost,5672,guest,guest,sf.data)
 #+END_SRC
+
+* Shapeless
+
+[[https://github.com/milessabin/shapeless][https://github.com/milessabin/shapeless]]
+
+#+BEGIN_QUOTE
+You must be shapeless, formless, like water. When you pour water in a cup, it becomes the cup. When
+you pour water in a bottle, it becomes the bottle. When you pour water in a teapot, it becomes the
+teapot. Water can drip and it can crash. Become like water my friend.
+                                                                                       -- Bruce Lee
+#+END_QUOTE
