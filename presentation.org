@@ -572,10 +572,10 @@ We can have HLists of tagged types.
 
 #+BEGIN_SRC scala
 case class RabbitMQ(
-  host: String, 
-  port: Int, 
-  username: String, 
-  password: String, 
+  host: String,
+  port: Int,
+  username: String,
+  password: String,
   defaultExchangeName: String)
 
 RabbitMQ("localhost", 5672, "guest", "guest", "sf.data")
