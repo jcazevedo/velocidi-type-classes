@@ -1,9 +1,9 @@
 package com.velocidi
 
-import com.typesafe.config.{ ConfigFactory, ConfigValueFactory }
+import com.typesafe.config.ConfigFactory
 
-import ConfigReader.Ops._
-import ConfigWriter.Ops._
+import com.velocidi.ConfigReader.Ops._
+import com.velocidi.ConfigWriter.Ops._
 
 object Main extends App {
   val conf = ConfigFactory.parseString(
@@ -14,6 +14,11 @@ object Main extends App {
        |  d = "str"
        |  e = false
        |  f = [1, 2, 3]
+       |  g {
+       |    a = 1
+       |    b = 2
+       |    c = 3
+       |  }
        |}""".stripMargin)
 
   assert(conf.getValue("a").as[Int] == 1)
@@ -23,10 +28,14 @@ object Main extends App {
   assert(conf.getValue("e").as[Boolean] == false)
   assert(conf.getValue("f").as[List[Int]] == List(1, 2, 3))
   assert(conf.getValue("f").as[Set[Int]] == Set(1, 2, 3))
+  assert(conf.getValue("g").as[Map[String, Int]] == Map("a" -> 1, "b" -> 2, "c" -> 3))
 
-  assert(1.toConfig == ConfigValueFactory.fromAnyRef(1))
-  assert(1099511627776l.toConfig == ConfigValueFactory.fromAnyRef(1099511627776l))
-  assert(4.5.toConfig == ConfigValueFactory.fromAnyRef(4.5))
-  assert("str".toConfig == ConfigValueFactory.fromAnyRef("str"))
-  assert(false.toConfig == ConfigValueFactory.fromAnyRef(false))
+  assert(1.toConfig == conf.getValue("a"))
+  assert(1099511627776l.toConfig == conf.getValue("b"))
+  assert(4.5.toConfig == conf.getValue("c"))
+  assert("str".toConfig == conf.getValue("d"))
+  assert(false.toConfig == conf.getValue("e"))
+  assert(List(1, 2, 3).toConfig == conf.getValue("f"))
+  assert(Set(1, 2, 3).toConfig == conf.getValue("f"))
+  assert(Map("a" -> 1, "b" -> 2, "c" -> 3).toConfig == conf.getValue("g"))
 }

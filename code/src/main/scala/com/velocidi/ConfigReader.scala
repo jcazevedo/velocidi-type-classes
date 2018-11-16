@@ -4,7 +4,7 @@ import scala.collection.JavaConverters._
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 
-import com.typesafe.config.{ ConfigList, ConfigValue }
+import com.typesafe.config.{ ConfigList, ConfigObject, ConfigValue }
 
 trait ConfigReader[A] {
   def read(configValue: ConfigValue): A
@@ -50,5 +50,18 @@ trait CollectionReaders {
       configValue.asInstanceOf[ConfigList].asScala.foldLeft(cbf()) {
         case (acc, x) => acc += reader.read(x)
       }.result()
+  }
+
+  implicit def mapReader[A](
+    implicit
+    reader: ConfigReader[A]): ConfigReader[Map[String, A]] = new ConfigReader[Map[String, A]] {
+    def read(configValue: ConfigValue): Map[String, A] = {
+      val obj = configValue.asInstanceOf[ConfigObject]
+      val keys = obj.keySet()
+
+      keys.asScala.foldLeft(Map.empty[String, A]) {
+        case (acc, k) => acc + (k -> reader.read(obj.get(k)))
+      }
+    }
   }
 }

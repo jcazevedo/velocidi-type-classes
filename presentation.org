@@ -316,7 +316,7 @@ import ConfigWriter.Ops._
 false.toConfig //// => ConfigBoolean(false)
 #+END_SRC
 
-* Derivation of type classes
+* Derivation of config readers
 
 Building upon available readers and writers, we can start deriving type classes for collection
 types:
@@ -341,7 +341,7 @@ trait CollectionReaders {
 object ConfigReader extends CollectionReaders
 #+END_SRC
 
-* Derivation of type classes
+* Derivation of config readers
 
 #+BEGIN_SRC scala
 val conf = ConfigFactory.parseString(
@@ -356,4 +356,87 @@ val conf = ConfigFactory.parseString(
 
 conf.getValue("f").as[List[Int]] //// => List(1, 2, 3)
 conf.getValue("f").as[Set[Int]] //// => Set(1, 2, 3)
+#+END_SRC
+
+* Derivation of config readers
+
+#+BEGIN_SRC scala
+trait CollectionReaders {
+  implicit def mapReader[A](
+    implicit
+    reader: ConfigReader[A]): ConfigReader[Map[String, A]] = new ConfigReader[Map[String, A]] {
+    def read(configValue: ConfigValue): Map[String, A] = {
+      val obj = configValue.asInstanceOf[ConfigObject]
+      val keys = obj.keySet()
+      keys.asScala.foldLeft(Map.empty[String, A]) {
+        case (acc, k) => acc + (k -> reader.read(obj.get(k)))
+      }
+    }
+  }
+}
+#+END_SRC
+
+* Derivation of config readers
+
+#+BEGIN_SRC scala
+val conf = ConfigFactory.parseString(
+  """|{
+     |  a = 1
+     |  b = 1099511627776
+     |  c = 4.5
+     |  d = "str"
+     |  e = false
+     |  f = [1, 2, 3]
+     |  g {
+     |    a = 1
+     |    b = 2
+     |    c = 3
+     |  }
+     |}""".stripMargin)
+
+conf.getValue("g").as[Map[String, Int]] //// => Map("a" -> 1, "b" -> 2, "c" -> 3)
+#+END_SRC
+
+* Derivation of config writers
+
+#+BEGIN_SRC scala
+import scala.collection.JavaConverters._
+import scala.language.higherKinds
+
+trait CollectionWriters {
+  implicit def traversableWriter[A, F[A] <: TraversableOnce[A]](
+    implicit
+    writer: ConfigWriter[A]): ConfigWriter[F[A]] = new ConfigWriter[F[A]] {
+    def write(value: F[A]): ConfigValue =
+      ConfigValueFactory.fromIterable(value.toList.map(writer.write).asJava)
+  }
+
+  implicit def mapWriter[A](
+    implicit
+    writer: ConfigWriter[A]): ConfigWriter[Map[String, A]] = new ConfigWriter[Map[String, A]] {
+    def write(value: Map[String, A]): ConfigValue =
+      ConfigValueFactory.fromMap(value.mapValues(writer.write).asJava)
+  }
+}
+
+object ConfigWriter extends CollectionWriters
+#+END_SRC
+
+* Derivation of config writers
+
+#+BEGIN_SRC scala
+List(1, 2, 3).toConfig
+//// => SimpleConfigList([1,2,3)]
+
+Set(1, 2, 3).toConfig
+//// => SimpleConfigList([1,2,3])
+
+Map("a" -> 1, "b" -> 2, "c" -> 3).toConfig
+//// => SimpleConfigObject({"a":1,"b":2,"c":3})
+
+Map(
+  "a" -> List(Map("k1" -> "v1")), 
+  "b" -> List(), 
+  "c" -> List(Map("k2" -> "v2", "k3" -> "v3")).toConfig
+//// => SimpleConfigObject({"a":[{"k1":"v1"}],"b":[],"c":[{"k2":"v2","k3":"v3"}]})
 #+END_SRC
