@@ -75,4 +75,11 @@ trait DerivedWriters {
         obj.withValue(key, hWriter.write(value.head))
       }
     }
+
+  implicit def productWriter[A, Repr](
+    implicit
+    gen: LabelledGeneric.Aux[A, Repr],
+    reprWriter: ConfigWriter[Repr]): ConfigWriter[A] = new ConfigWriter[A] {
+    def write(value: A): ConfigValue = reprWriter.write(gen.to(value))
+  }
 }

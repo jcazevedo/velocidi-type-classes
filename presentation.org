@@ -720,4 +720,41 @@ trait DerivedReaders {
       gen.from(reprReader.read(configValue))
   }
 }
+
+trait DerivedWriters {
+  implicit def productWriter[A, Repr](
+    implicit
+    gen: LabelledGeneric.Aux[A, Repr],
+    reprWriter: ConfigWriter[Repr]): ConfigWriter[A] = new ConfigWriter[A] {
+    def write(value: A): ConfigValue = reprWriter.write(gen.to(value))
+  }
+}
+#+END_SRC
+
+* Generic derivation of readers and writers for case classes
+
+#+BEGIN_SRC scala
+val rabbitmqConf = ConfigFactory.parseString(
+  """|{
+     |  rabbitmq {
+     |    host = "localhost"
+     |    port = 5672
+     |    username = "guest"
+     |    password = "guest"
+     |    defaultExchangeName = "sf.data"
+     |  }
+     |}""".stripMargin)
+
+rabbitmqConf.getValue("rabbitmq").as[RabbitMQ]
+//// => RabbitMQ(localhost,5672,guest,guest,sf.data)
+
+val rmq = RabbitMQ("localhost", 5672, "guest", "guest", "sf.data")
+rmq.toConfig
+//// => SimpleConfigObject({
+////      "defaultExchangeName":"sf.data",
+////      "host":"localhost",
+////      "password":"guest",
+////      "port":5672,
+////      "username":"guest"
+////    })
 #+END_SRC
