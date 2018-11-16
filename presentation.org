@@ -567,3 +567,95 @@ We can have HLists of tagged types.
 ////   Symbol with KeyTag[Symbol with Tagged[String("c")],Symbol] ::
 ////   shapeless.HNil
 #+END_SRC
+
+* Shapes start to get similar
+
+#+BEGIN_SRC scala
+case class RabbitMQ(
+  host: String, 
+  port: Int, 
+  username: String, 
+  password: String, 
+  defaultExchangeName: String)
+
+RabbitMQ("localhost", 5672, "guest", "guest", "sf.data")
+
+('host ->> "localhost") ::
+  ('port ->> 5672) ::
+  ('username ->> "guest") ::
+  ('password ->> "guest") ::
+  ('defaultExchangeName ->> "sf.data") ::
+  HNil
+#+END_SRC
+
+* Deriving a config writer for HLists of tagged types
+
+#+BEGIN_SRC scala
+trait DerivedWriters {
+  implicit val hNilWriter: ConfigWriter[HNil] = new ConfigWriter[HNil] {
+    def write(value: HNil): ConfigValue = ConfigValueFactory.fromMap(Map.empty[String, Any].asJava)
+  }
+
+  implicit def hListWriter[K <: Symbol, H, T <: HList](
+    implicit
+    witness: Witness.Aux[K],
+    hWriter: ConfigWriter[H],
+    tWriter: ConfigWriter[T]): ConfigWriter[FieldType[K, H] :: T] =
+    new ConfigWriter[FieldType[K, H] :: T] {
+      def write(value: FieldType[K, H] :: T): ConfigValue = {
+        val obj = tWriter.write(value.tail).asInstanceOf[ConfigObject]
+        val key = witness.value.name
+        obj.withValue(key, hWriter.write(value.head))
+      }
+    }
+}
+
+object ConfigWriter extends DerivedWriters
+#+END_SRC
+
+* Using our config writer for HLists of tagged types
+
+#+BEGIN_SRC scala
+val rmqHL =
+  ('host ->> "localhost") ::
+    ('port ->> 5672) ::
+    ('username ->> "guest") ::
+    ('password ->> "guest") ::
+    ('defaultExchangeName ->> "sf.data") ::
+    HNil
+
+rmqHL.toConfig
+//// => SimpleConfigObject({
+////      "defaultExchangeName":"sf.data",
+////      "host":"localhost",
+////      "password":"guest",
+////      "port":5672,
+////      "username":"guest"
+////    })
+#+END_SRC
+
+* Deriving a config reader for HLists of tagged types
+
+#+BEGIN_SRC scala
+trait DerivedReaders {
+  implicit val hNilReader: ConfigReader[HNil] = new ConfigReader[HNil] {
+    def read(configValue: ConfigValue): HNil = HNil
+  }
+
+  implicit def hListReader[K <: Symbol, H, T <: HList](
+    implicit
+    witness: Witness.Aux[K],
+    hReader: ConfigReader[H],
+    tReader: ConfigReader[T]): ConfigReader[FieldType[K, H] :: T] =
+    new ConfigReader[FieldType[K, H] :: T] {
+      def read(configValue: ConfigValue): FieldType[K, H] :: T = {
+        val obj = configValue.asInstanceOf[ConfigObject]
+        val key = witness.value.name
+        val head = obj.get(key)
+        field[K](hReader.read(head)) :: tReader.read(obj.withoutKey(key))
+      }
+    }
+}
+
+object ConfigReader extends DerivedReaders
+#+END_SRC

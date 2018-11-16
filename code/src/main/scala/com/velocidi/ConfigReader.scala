@@ -5,12 +5,14 @@ import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 
 import com.typesafe.config.{ ConfigList, ConfigObject, ConfigValue }
+import shapeless._
+import shapeless.labelled._
 
 trait ConfigReader[A] {
   def read(configValue: ConfigValue): A
 }
 
-object ConfigReader extends BasicReaders with CollectionReaders {
+object ConfigReader extends BasicReaders with CollectionReaders with DerivedReaders {
   object Ops {
     implicit class ConfigReaderOps(x: ConfigValue) {
       def as[A: ConfigReader]: A =
@@ -64,4 +66,24 @@ trait CollectionReaders {
       }
     }
   }
+}
+
+trait DerivedReaders {
+  implicit val hNilReader: ConfigReader[HNil] = new ConfigReader[HNil] {
+    def read(configValue: ConfigValue): HNil = HNil
+  }
+
+  implicit def hListReader[K <: Symbol, H, T <: HList](
+    implicit
+    witness: Witness.Aux[K],
+    hReader: ConfigReader[H],
+    tReader: ConfigReader[T]): ConfigReader[FieldType[K, H] :: T] =
+    new ConfigReader[FieldType[K, H] :: T] {
+      def read(configValue: ConfigValue): FieldType[K, H] :: T = {
+        val obj = configValue.asInstanceOf[ConfigObject]
+        val key = witness.value.name
+        val head = obj.get(key)
+        field[K](hReader.read(head)) :: tReader.read(obj.withoutKey(key))
+      }
+    }
 }

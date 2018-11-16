@@ -3,13 +3,15 @@ package com.velocidi
 import scala.collection.JavaConverters._
 import scala.language.higherKinds
 
-import com.typesafe.config.{ ConfigValue, ConfigValueFactory }
+import com.typesafe.config.{ ConfigObject, ConfigValue, ConfigValueFactory }
+import shapeless._
+import shapeless.labelled._
 
 trait ConfigWriter[A] {
   def write(value: A): ConfigValue
 }
 
-object ConfigWriter extends BasicWriters with CollectionWriters {
+object ConfigWriter extends BasicWriters with CollectionWriters with DerivedWriters {
   object Ops {
     implicit class ConfigWriterOps[A: ConfigWriter](x: A) {
       def toConfig: ConfigValue =
@@ -54,4 +56,23 @@ trait CollectionWriters {
     def write(value: Map[String, A]): ConfigValue =
       ConfigValueFactory.fromMap(value.mapValues(writer.write).asJava)
   }
+}
+
+trait DerivedWriters {
+  implicit val hNilWriter: ConfigWriter[HNil] = new ConfigWriter[HNil] {
+    def write(value: HNil): ConfigValue = ConfigValueFactory.fromMap(Map.empty[String, Any].asJava)
+  }
+
+  implicit def hListWriter[K <: Symbol, H, T <: HList](
+    implicit
+    witness: Witness.Aux[K],
+    hWriter: ConfigWriter[H],
+    tWriter: ConfigWriter[T]): ConfigWriter[FieldType[K, H] :: T] =
+    new ConfigWriter[FieldType[K, H] :: T] {
+      def write(value: FieldType[K, H] :: T): ConfigValue = {
+        val obj = tWriter.write(value.tail).asInstanceOf[ConfigObject]
+        val key = witness.value.name
+        obj.withValue(key, hWriter.write(value.head))
+      }
+    }
 }
