@@ -14,7 +14,7 @@
 5. Shapeless
 6. Generic derivation of type classes
 7. Common issues
-8. Resources
+8. References
 
 * Polymorphism
 
@@ -886,7 +886,7 @@ sqlStore.toConfig
 //// => SimpleConfigObject({"jdbcUrl":"jdbc:h2:mem:local;DB_CLOSE_DELAY=-1","tableName":"kv-store"})
 #+END_SRC
 
-* Recursion
+* Common issues: recursion
 
 #+BEGIN_SRC scala
 sealed trait BinaryTree[+A]
@@ -959,3 +959,16 @@ bt.toConfig
 ////                        {"left":{},
 ////                         "right":{"value":4}}}})
 #+END_SRC
+
+* More common issues
+
+- Implicit priority;
+- Errors ([[https://github.com/tek/splain][splain]], Derivation macro in [[https://pureconfig.github.io/docs/faq.html#how-do-i-debug-implicit-not-found-errors][PureConfig]]);
+- Configuration introduces more implicits;
+- Performance (cachedImplicit, semi-automatic derivation).
+
+* References
+
+- [[https://github.com/jcazevedo/velocidi-type-classes][github.com/jcazevedo/velocidi-type-classes]]
+- [[https://underscore.io/books/shapeless-guide/][The Type Astronaut's Guide to Shapeless]]
+- [[http://fommil.com/scalax15/][Shapeless for Mortals]]
