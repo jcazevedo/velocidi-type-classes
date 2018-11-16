@@ -14,8 +14,7 @@
 5. Shapeless
 6. Generic derivation of type classes
 7. Common issues
-8. Configuring derivation
-9. Other resources
+8. Resources
 
 * Polymorphism
 
