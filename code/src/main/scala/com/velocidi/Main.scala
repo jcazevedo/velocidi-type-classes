@@ -38,4 +38,19 @@ object Main extends App {
   assert(List(1, 2, 3).toConfig == conf.getValue("f"))
   assert(Set(1, 2, 3).toConfig == conf.getValue("f"))
   assert(Map("a" -> 1, "b" -> 2, "c" -> 3).toConfig == conf.getValue("g"))
+
+  case class RabbitMQ(host: String, port: Int, username: String, password: String, defaultExchangeName: String)
+
+  val rabbitmqConf = ConfigFactory.parseString(
+    """|{
+       |  rabbitmq {
+       |    host = "localhost"
+       |    port = 5672
+       |    username = "guest"
+       |    password = "guest"
+       |    defaultExchangeName = "sf.data"
+       |  }
+       |}""".stripMargin)
+
+  assert(rabbitmqConf.getValue("rabbitmq").as[RabbitMQ] == RabbitMQ("localhost", 5672, "guest", "guest", "sf.data"))
 }

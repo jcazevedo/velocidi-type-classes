@@ -86,4 +86,12 @@ trait DerivedReaders {
         field[K](hReader.read(head)) :: tReader.read(obj.withoutKey(key))
       }
     }
+
+  implicit def productReader[A, Repr](
+    implicit
+    gen: LabelledGeneric.Aux[A, Repr],
+    reprReader: ConfigReader[Repr]): ConfigReader[A] = new ConfigReader[A] {
+    def read(configValue: ConfigValue): A =
+      gen.from(reprReader.read(configValue))
+  }
 }
