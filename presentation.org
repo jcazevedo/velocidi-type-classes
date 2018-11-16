@@ -492,3 +492,19 @@ you pour water in a bottle, it becomes the bottle. When you pour water in a teap
 teapot. Water can drip and it can crash. Become like water my friend.
                                                                                        -- Bruce Lee
 #+END_QUOTE
+
+* Singleton types
+
+Shapeless adds support for singleton-typed literals via implicit macros.
+
+#+BEGIN_SRC scala
+import shapeless.syntax.singleton._
+
+23.narrow     //// => Int(42)       <: Int
+"str".narrow  //// => String("str") <: String
+'foo.narrow   //// => Symbol('foo)  <: Symbol
+
+'a ->> 23     //// => Int with KeyTag[Symbol with Tagged[String("a")], Int]
+'b ->> "str"  //// => String with KeyTag[Symbol with Tagged[String("b")], String]
+'c ->> 'foo   //// => Symbol with KeyTag[Symbol with Tagged[String("c")], Symbol]
+#+END_SRC
