@@ -440,3 +440,44 @@ Map(
   "c" -> List(Map("k2" -> "v2", "k3" -> "v3")).toConfig
 //// => SimpleConfigObject({"a":[{"k1":"v1"}],"b":[],"c":[{"k2":"v2","k3":"v3"}]})
 #+END_SRC
+
+* Derivation of type classes
+
+#+BEGIN_SRC scala
+case class RabbitMQ(host: String, port: Int, username: String, password: String, exchangeName: String)
+
+val rabbitmqConf = ConfigFactory.parseString(
+  """|{
+     |  rabbitmq {
+     |    host = "localhost"
+     |    port = 5672
+     |    username = "guest"
+     |    password = "guest"
+     |    exchangeName = "sf.data"
+     |  }
+     |}""".stripMargin)
+
+rabbitmqConf.getValue("rabbitmq").as[RabbitMQ]
+//// => could not find implicit value for evidence parameter of type 
+////    com.velocidi.ConfigReader[com.velocidi.Main.RabbitMQ]
+////    :(
+#+END_SRC
+
+* Derivation of type classes
+
+#+BEGIN_SRC scala
+implicit val rabbitmqConfigReader: ConfigReader[RabbitMQ] = new ConfigReader[RabbitMQ] {
+  def read(configValue: ConfigValue): RabbitMQ = {
+    val obj = configValue.asInstanceOf[ConfigObject]
+    RabbitMQ(
+      obj.get("host").as[String],
+      obj.get("port").as[Int],
+      obj.get("username").as[String],
+      obj.get("password").as[String],
+      obj.get("defaultExchangeName").as[String])
+  }
+}
+
+rabbitmqConf.getValue("rabbitmq").as[RabbitMQ]
+//// => RabbitMQ(localhost,5672,guest,guest,sf.data)
+#+END_SRC
