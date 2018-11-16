@@ -3,6 +3,7 @@ package com.velocidi
 import scala.collection.JavaConverters._
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
+import scala.util.Try
 
 import com.typesafe.config.{ ConfigList, ConfigObject, ConfigValue }
 import shapeless._
@@ -85,6 +86,20 @@ trait DerivedReaders {
         val head = obj.get(key)
         field[K](hReader.read(head)) :: tReader.read(obj.withoutKey(key))
       }
+    }
+
+  implicit val cNilReader: ConfigReader[CNil] = new ConfigReader[CNil] {
+    def read(configValue: ConfigValue): CNil = ???
+  }
+
+  implicit def coproductReader[K <: Symbol, H, T <: Coproduct](
+    implicit
+    witness: Witness.Aux[K],
+    hReader: ConfigReader[H],
+    tReader: ConfigReader[T]): ConfigReader[FieldType[K, H] :+: T] =
+    new ConfigReader[FieldType[K, H] :+: T] {
+      def read(configValue: ConfigValue): FieldType[K, H] :+: T =
+        Try(Inl(field[K](hReader.read(configValue)))).getOrElse(Inr(tReader.read(configValue)))
     }
 
   implicit def productReader[A, Repr](

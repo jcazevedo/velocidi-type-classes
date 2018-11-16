@@ -777,6 +777,9 @@ val keyValueStoreConf = ConfigFactory.parseString(
      |    tableName = "kv-store"
      |  }
      |}""".stripMargin)
+
+keyValueStoreConf.getValue("in-memory").as[KeyValueStore]
+//// Doesn't compile. :(
 #+END_SRC
 
 * Coproduct
@@ -798,4 +801,50 @@ sealed trait CNil extends Coproduct
 sealed trait :+:[+H, +T <: Coproduct] extends Coproduct
 final case class Inl[+H, +T <: Coproduct](head : H) extends :+:[H, T]
 final case class Inr[+H, +T <: Coproduct](tail : T) extends :+:[H, T]
+#+END_SRC
+
+* Deriving config readers for coproducts
+
+#+BEGIN_SRC scala
+trait DerivedReaders {
+  implicit val cNilReader: ConfigReader[CNil] = new ConfigReader[CNil] {
+    def read(configValue: ConfigValue): CNil = ???
+  }
+
+  implicit def coproductReader[K <: Symbol, H, T <: Coproduct](
+    implicit
+    witness: Witness.Aux[K],
+    hReader: ConfigReader[H],
+    tReader: ConfigReader[T]): ConfigReader[FieldType[K, H] :+: T] =
+    new ConfigReader[FieldType[K, H] :+: T] {
+      def read(configValue: ConfigValue): FieldType[K, H] :+: T =
+        Try(Inl(field[K](hReader.read(configValue)))).getOrElse(Inr(tReader.read(configValue)))
+    }
+}
+#+END_SRC
+
+* Deriving config readers for coproducts
+
+#+BEGIN_SRC scala
+sealed trait KeyValueStore
+case class InMemory(maxSize: Int) extends KeyValueStore
+case class SqlBased(jdbcUrl: String, tableName: String) extends KeyValueStore
+
+val keyValueStoreConf = ConfigFactory.parseString(
+  """|{
+     |  in-memory {
+     |    maxSize = 2000
+     |  }
+     |
+     |  sql-based {
+     |    jdbcUrl = "jdbc:h2:mem:local;DB_CLOSE_DELAY=-1"
+     |    tableName = "kv-store"
+     |  }
+     |}""".stripMargin)
+
+keyValueStoreConf.getValue("in-memory").as[KeyValueStore]
+//// => InMemory(2000)
+
+keyValueStoreConf.getValue("sql-based").as[KeyValueStore]
+//// => SqlBased("jdbc:h2:mem:local;DB_CLOSE_DELAY=-1", "kv-store")
 #+END_SRC

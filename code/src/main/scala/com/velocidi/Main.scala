@@ -71,4 +71,10 @@ object Main extends App {
        |    tableName = "kv-store"
        |  }
        |}""".stripMargin)
+
+  val kvStore = InMemory(2000)
+  val sqlStore = SqlBased("jdbc:h2:mem:local;DB_CLOSE_DELAY=-1", "kv-store")
+
+  assert(keyValueStoreConf.getValue("in-memory").as[KeyValueStore] == kvStore)
+  assert(keyValueStoreConf.getValue("sql-based").as[KeyValueStore] == sqlStore)
 }
