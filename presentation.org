@@ -848,3 +848,41 @@ keyValueStoreConf.getValue("in-memory").as[KeyValueStore]
 keyValueStoreConf.getValue("sql-based").as[KeyValueStore]
 //// => SqlBased("jdbc:h2:mem:local;DB_CLOSE_DELAY=-1", "kv-store")
 #+END_SRC
+
+* Deriving config writers for coproducts
+
+#+BEGIN_SRC scala
+trait DerivedWriters {
+  implicit val cNilWriter: ConfigWriter[CNil] = new ConfigWriter[CNil] {
+    def write(value: CNil): ConfigValue = ???
+  }
+
+  implicit def coproductWriter[K <: Symbol, H, T <: Coproduct](
+    implicit
+    witness: Witness.Aux[K],
+    hWriter: ConfigWriter[H],
+    tWriter: ConfigWriter[T]): ConfigWriter[FieldType[K, H] :+: T] =
+    new ConfigWriter[FieldType[K, H] :+: T] {
+      def write(value: FieldType[K, H] :+: T): ConfigValue = value match {
+        case Inl(head) => hWriter.write(head)
+        case Inr(tail) => tWriter.write(tail)
+      }
+    }
+}
+#+END_SRC
+
+* Deriving config writers for coproducts
+
+#+BEGIN_SRC scala
+sealed trait KeyValueStore
+case class InMemory(maxSize: Int) extends KeyValueStore
+case class SqlBased(jdbcUrl: String, tableName: String) extends KeyValueStore
+
+val kvStore = InMemory(2000)
+kvStore.toConfig
+//// => SimpleConfigObject({"maxSize":2000})
+
+val sqlStore = SqlBased("jdbc:h2:mem:local;DB_CLOSE_DELAY=-1", "kv-store")
+sqlStore.toConfig
+//// => SimpleConfigObject({"jdbcUrl":"jdbc:h2:mem:local;DB_CLOSE_DELAY=-1","tableName":"kv-store"})
+#+END_SRC

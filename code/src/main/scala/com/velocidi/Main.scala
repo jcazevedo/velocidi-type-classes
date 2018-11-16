@@ -77,4 +77,6 @@ object Main extends App {
 
   assert(keyValueStoreConf.getValue("in-memory").as[KeyValueStore] == kvStore)
   assert(keyValueStoreConf.getValue("sql-based").as[KeyValueStore] == sqlStore)
+  assert(kvStore.toConfig == keyValueStoreConf.getValue("in-memory"))
+  assert(sqlStore.toConfig == keyValueStoreConf.getValue("sql-based"))
 }

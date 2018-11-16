@@ -76,6 +76,22 @@ trait DerivedWriters {
       }
     }
 
+  implicit val cNilWriter: ConfigWriter[CNil] = new ConfigWriter[CNil] {
+    def write(value: CNil): ConfigValue = ???
+  }
+
+  implicit def coproductWriter[K <: Symbol, H, T <: Coproduct](
+    implicit
+    witness: Witness.Aux[K],
+    hWriter: ConfigWriter[H],
+    tWriter: ConfigWriter[T]): ConfigWriter[FieldType[K, H] :+: T] =
+    new ConfigWriter[FieldType[K, H] :+: T] {
+      def write(value: FieldType[K, H] :+: T): ConfigValue = value match {
+        case Inl(head) => hWriter.write(head)
+        case Inr(tail) => tWriter.write(tail)
+      }
+    }
+
   implicit def productWriter[A, Repr](
     implicit
     gen: LabelledGeneric.Aux[A, Repr],
