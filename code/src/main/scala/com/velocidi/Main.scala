@@ -55,4 +55,20 @@ object Main extends App {
 
   assert(rabbitmqConf.getValue("rabbitmq").as[RabbitMQ] == rmq)
   assert(rmq.toConfig == rabbitmqConf.getValue("rabbitmq"))
+
+  sealed trait KeyValueStore
+  case class InMemory(maxSize: Int) extends KeyValueStore
+  case class SqlBased(jdbcUrl: String, tableName: String) extends KeyValueStore
+
+  val keyValueStoreConf = ConfigFactory.parseString(
+    """|{
+       |  in-memory {
+       |    maxSize = 2000
+       |  }
+       |
+       |  sql-based {
+       |    jdbcUrl = "jdbc:h2:mem:local;DB_CLOSE_DELAY=-1"
+       |    tableName = "kv-store"
+       |  }
+       |}""".stripMargin)
 }

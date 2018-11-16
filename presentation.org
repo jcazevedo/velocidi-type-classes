@@ -758,3 +758,44 @@ rmq.toConfig
 ////      "username":"guest"
 ////    })
 #+END_SRC
+
+* Working with sealed families
+
+#+BEGIN_SRC scala
+sealed trait KeyValueStore
+case class InMemory(maxSize: Int) extends KeyValueStore
+case class SqlBased(jdbcUrl: String, tableName: String) extends KeyValueStore
+
+val keyValueStoreConf = ConfigFactory.parseString(
+  """|{
+     |  in-memory {
+     |    maxSize = 2000
+     |  }
+     |
+     |  sql-based {
+     |    jdbcUrl = "jdbc:h2:mem:local;DB_CLOSE_DELAY=-1"
+     |    tableName = "kv-store"
+     |  }
+     |}""".stripMargin)
+#+END_SRC
+
+* Coproduct
+
+Shapeless can represent sealed families in a Coproduct representation
+
+#+BEGIN_SRC scala
+sealed trait KeyValueStore
+case class InMemory(maxSize: Int) extends KeyValueStore
+case class SqlBased(jdbcUrl: String, tableName: String) extends KeyValueStore
+
+val generic = LabelledGeneric[KeyValueStore]
+//// generic.Repr : InMemory with KeyTag[Symbol with Tagged[String("InMemory")], InMemory] :+:
+////                SqlBased with KeyTag[Symbol with Tagged[String("SqlBased")], SqlBased] :+:
+////                shapeless.CNil
+
+sealed trait Coproduct
+sealed trait CNil extends Coproduct
+sealed trait :+:[+H, +T <: Coproduct] extends Coproduct
+final case class Inl[+H, +T <: Coproduct](head : H) extends :+:[H, T]
+final case class Inr[+H, +T <: Coproduct](tail : T) extends :+:[H, T]
+#+END_SRC
