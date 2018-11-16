@@ -547,3 +547,23 @@ def f[V](v: FieldType[witness.T, V])(
   implicit
   witness: Witness): (witness.T, V) = witness.value -> v
 #+END_SRC
+
+* HLists
+
+Shapeless allows us to build heterogeneous lists.
+
+#+BEGIN_SRC scala
+23 :: "str" :: 'foo :: HNil //// : Int :: String :: Symbol :: HNil
+#+END_SRC
+
+* HLists
+
+We can have HLists of tagged types.
+
+#+BEGIN_SRC scala
+('a ->> 23) :: ('b ->> "str") :: ('c -> 'foo) :: HNil
+//// : Int with KeyTag[Symbol with Tagged[String("a")],Int] ::
+////   String with KeyTag[Symbol with Tagged[String("b")],String] ::
+////   Symbol with KeyTag[Symbol with Tagged[String("c")],Symbol] ::
+////   shapeless.HNil
+#+END_SRC
