@@ -1,6 +1,6 @@
 # Type classes in Scala
 
-This repository contains the material for a talk given at [Velocidi
+This repository contains the materials for a talk given at [Velocidi
 Porto][velocidi] about type classes in Scala.
 
 The presentation is a single [org mode][org-mode] [file][presentation]. It's
